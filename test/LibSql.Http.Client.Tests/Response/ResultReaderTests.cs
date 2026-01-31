@@ -74,7 +74,10 @@ public class ResultReaderTests
         var action = () =>
             reader.ReadAt(reader.Count, TestDataJsonSerializerContext.Default.ResultSetTestModel);
         var action2 = () =>
-            reader.ReadAt((reader.Count + 1) * -1, TestDataJsonSerializerContext.Default.ResultSetTestModel);
+            reader.ReadAt(
+                (reader.Count + 1) * -1,
+                TestDataJsonSerializerContext.Default.ResultSetTestModel
+            );
 
         reader.Count.Should().Be(scenario.Expected.Length);
         action.Should().ThrowExactly<IndexOutOfRangeException>();

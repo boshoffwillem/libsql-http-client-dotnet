@@ -4,7 +4,8 @@ namespace LibSql.Http.Client.Tests.Shared.Models;
 
 public record HranaNamedArg(
     [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("value")] HranaArgValue Value);
+    [property: JsonPropertyName("value")] HranaArgValue Value
+);
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(HranaFloatValue), "float")]
@@ -21,27 +22,29 @@ public record HranaIntegerValue([property: JsonPropertyName("value")] string Val
 public record HranaStatement(
     [property: JsonPropertyName("sql")] string Sql,
     [property: JsonPropertyName("args")] HranaArgValue?[]? Args = null,
-    [property: JsonPropertyName("named_args")]
-    HranaNamedArg[]? NamedArgs = null);
+    [property: JsonPropertyName("named_args")] HranaNamedArg[]? NamedArgs = null
+);
 
 public record HranaBatchStepCondition(
     [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("step")] int? Step = null,
-    [property: JsonPropertyName("cond")] HranaBatchStepCondition? Condition = null);
+    [property: JsonPropertyName("cond")] HranaBatchStepCondition? Condition = null
+);
 
 public record HranaBatchStep(
     [property: JsonPropertyName("stmt")] HranaStatement Statement,
-    [property: JsonPropertyName("condition")]
-    HranaBatchStepCondition? Condition = null);
+    [property: JsonPropertyName("condition")] HranaBatchStepCondition? Condition = null
+);
 
 public record HranaBatchRequest([property: JsonPropertyName("steps")] HranaBatchStep[] Steps);
 
 public record HranaPipelineRequest(
     [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("batch")] HranaBatchRequest? Batch = null,
-    [property: JsonPropertyName("stmt")] HranaStatement? Statement = null);
+    [property: JsonPropertyName("stmt")] HranaStatement? Statement = null
+);
 
 public record HranaPipelineRequestBody(
-    [property: JsonPropertyName("requests")]
-    HranaPipelineRequest[] Requests,
-    [property: JsonPropertyName("baton")] string? Baton = null);
+    [property: JsonPropertyName("requests")] HranaPipelineRequest[] Requests,
+    [property: JsonPropertyName("baton")] string? Baton = null
+);

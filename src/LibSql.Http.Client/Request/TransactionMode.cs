@@ -9,16 +9,19 @@ public enum TransactionMode
     /// No transaction required
     /// </summary>
     None = 0,
+
     /// <summary>
     /// BEGIN IMMEDIATE
     /// </summary>
     WriteImmediate = 1,
+
     /// <summary>
     /// BEGIN DEFERRED
     /// </summary>
     Deferred = 2,
+
     /// <summary>
     /// BEGIN TRANSACtION READONLY
     /// </summary>
-    ReadOnly = 3
+    ReadOnly = 3,
 }

@@ -6,14 +6,12 @@ namespace LibSql.Http.Client.Tests.Shared.Models;
 
 public record ResultReaderTestScenario(
     [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("response")]
-    JsonDocument Response,
-    [property: JsonPropertyName("expected")]
-    ResultSetTestModel[]?[] Expected,
-    [property: JsonPropertyName("commands")]
-    bool[] Commands,
+    [property: JsonPropertyName("response")] JsonDocument Response,
+    [property: JsonPropertyName("expected")] ResultSetTestModel[]?[] Expected,
+    [property: JsonPropertyName("commands")] bool[] Commands,
     [property: JsonPropertyName("errors")] List<ExecutionError> Errors,
-    [property: JsonPropertyName("stats")] List<ExecutionStats> Stats)
+    [property: JsonPropertyName("stats")] List<ExecutionStats> Stats
+)
 {
     public override string ToString() => Name;
 }

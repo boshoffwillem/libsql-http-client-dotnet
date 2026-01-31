@@ -18,7 +18,8 @@ internal class ResultReader(
     string? baton,
     ExecutionError[] errors,
     ExecutionStats[] stats,
-    List<List<long[]>> rowsMarkers) : IResultReader
+    List<List<long[]>> rowsMarkers
+) : IResultReader
 {
     private int _position = -1;
 
@@ -56,16 +57,21 @@ internal class ResultReader(
     {
         var uIndex = index < 0 ? Count + index : index;
 
-        if (uIndex >= Count || uIndex < 0) throw new IndexOutOfRangeException();
+        if (uIndex >= Count || uIndex < 0)
+            throw new IndexOutOfRangeException();
 
-        return rowsMarkers[uIndex].Select(
-            row => JsonSerializer.Deserialize(buffer.AsSpan(row), typeInfo) ??
-                   throw new JsonException($"Failed to deserialize row to type {typeof(T).Name}")).ToList();
+        return rowsMarkers[uIndex]
+            .Select(row =>
+                JsonSerializer.Deserialize(buffer.AsSpan(row), typeInfo)
+                ?? throw new JsonException($"Failed to deserialize row to type {typeof(T).Name}")
+            )
+            .ToList();
     }
 
     public object? GetScalarValue()
     {
-        if (Count < 1 || rowsMarkers[0].Count < 1) return null;
+        if (Count < 1 || rowsMarkers[0].Count < 1)
+            return null;
 
         var row = rowsMarkers[0][0];
 
@@ -73,7 +79,8 @@ internal class ResultReader(
 
         while (reader.Read())
         {
-            if (reader.TokenType is not JsonTokenType.PropertyName) continue;
+            if (reader.TokenType is not JsonTokenType.PropertyName)
+                continue;
             reader.Read();
 
             return reader.TokenType switch
@@ -83,18 +90,18 @@ internal class ResultReader(
                 JsonTokenType.True => true,
                 JsonTokenType.False => false,
                 JsonTokenType.Null => null,
-                _ => throw new InvalidOperationException()
+                _ => throw new InvalidOperationException(),
             };
         }
 
         return null;
     }
 
-
     public static async Task<ResultReader> ParseAsync(
         Stream stream,
         HashSet<int>? resultsToIgnore = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var memoryOwner = ArrayPool<byte>.Shared.Rent((int)stream.Length);
 
@@ -119,7 +126,8 @@ internal class ResultReader(
                 rowsMarks,
                 errors,
                 stats,
-                resultsToIgnore ?? []);
+                resultsToIgnore ?? []
+            );
 
             writer.WriteEndArray();
 
@@ -136,7 +144,8 @@ internal class ResultReader(
     public static async Task<ResultReader> ParseAsync(
         HttpContent content,
         HashSet<int>? resultsToIgnore = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         await content.LoadIntoBufferAsync();
 
@@ -153,7 +162,8 @@ internal class ResultReader(
         List<List<long[]>> states,
         List<ExecutionError> errors,
         List<ExecutionStats> stats,
-        HashSet<int> resultsToIgnore)
+        HashSet<int> resultsToIgnore
+    )
     {
         var reader = new Utf8JsonReader(bytes);
 
@@ -161,14 +171,21 @@ internal class ResultReader(
 
         while (reader.Read())
         {
-            if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("baton"u8) && reader.Read() &&
-                reader.TokenType is JsonTokenType.String)
+            if (
+                reader.TokenType == JsonTokenType.PropertyName
+                && reader.ValueTextEquals("baton"u8)
+                && reader.Read()
+                && reader.TokenType is JsonTokenType.String
+            )
             {
                 baton = reader.GetString();
                 continue;
             }
 
-            if (reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals("results"u8))
+            if (
+                reader.TokenType == JsonTokenType.PropertyName
+                && reader.ValueTextEquals("results"u8)
+            )
             {
                 reader.Read();
                 HandleResultsArray(ref reader, writer, states, errors, stats, resultsToIgnore);
@@ -184,7 +201,8 @@ internal class ResultReader(
         List<List<long[]>> marks,
         List<ExecutionError> errors,
         List<ExecutionStats> stats,
-        HashSet<int> resultsToIgnore)
+        HashSet<int> resultsToIgnore
+    )
     {
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
@@ -197,7 +215,8 @@ internal class ResultReader(
                 else if (reader.ValueTextEquals("batch"u8))
                     while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                     {
-                        if (reader.TokenType != JsonTokenType.PropertyName) continue;
+                        if (reader.TokenType != JsonTokenType.PropertyName)
+                            continue;
 
                         if (reader.ValueTextEquals("step_results"u8))
                         {
@@ -227,27 +246,29 @@ internal class ResultReader(
                             continue;
                         }
 
-                        if (reader.ValueTextEquals("step_errors"u8) &&
-                            reader.Read())
+                        if (reader.ValueTextEquals("step_errors"u8) && reader.Read())
                             while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                             {
-                                if (reader.TokenType == JsonTokenType.Null) continue;
+                                if (reader.TokenType == JsonTokenType.Null)
+                                    continue;
 
                                 HandleErrorResult(ref reader, errors);
                             }
                     }
                 else if (reader.ValueTextEquals("execute"u8))
                     while (reader.Read() && reader.TokenType is not JsonTokenType.EndObject)
-                        if (reader.TokenType is JsonTokenType.PropertyName && reader.ValueTextEquals("result"u8))
+                        if (
+                            reader.TokenType is JsonTokenType.PropertyName
+                            && reader.ValueTextEquals("result"u8)
+                        )
                             ReadResults(ref reader, writer, marks, stats);
             }
     }
 
-    private static void HandleErrorResult(
-        ref Utf8JsonReader reader,
-        List<ExecutionError> errors)
+    private static void HandleErrorResult(ref Utf8JsonReader reader, List<ExecutionError> errors)
     {
-        if (reader.TokenType is JsonTokenType.Null) return;
+        if (reader.TokenType is JsonTokenType.Null)
+            return;
 
         string? message = null;
         string? code = null;
@@ -269,14 +290,16 @@ internal class ResultReader(
             }
         }
 
-        if (message is not null) errors.Add(new ExecutionError(message, code));
+        if (message is not null)
+            errors.Add(new ExecutionError(message, code));
     }
 
     private static void ReadResults(
         ref Utf8JsonReader reader,
         Utf8JsonWriter writer,
         List<List<long[]>> marks,
-        List<ExecutionStats> stats)
+        List<ExecutionStats> stats
+    )
     {
         var cols = new List<byte[]>();
         var rows = new List<long[]>();
@@ -290,7 +313,8 @@ internal class ResultReader(
 
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
-            if (reader.TokenType != JsonTokenType.PropertyName) continue;
+            if (reader.TokenType != JsonTokenType.PropertyName)
+                continue;
 
             if (reader.ValueTextEquals("rows_read"u8) && reader.Read())
             {
@@ -332,8 +356,11 @@ internal class ResultReader(
             {
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-                    if (reader.TokenType is JsonTokenType.PropertyName && reader.ValueTextEquals("name"u8) &&
-                        reader.Read())
+                    if (
+                        reader.TokenType is JsonTokenType.PropertyName
+                        && reader.ValueTextEquals("name"u8)
+                        && reader.Read()
+                    )
                         cols.Add(reader.ValueSpan.ToArray());
 
                 continue;
@@ -354,12 +381,20 @@ internal class ResultReader(
 
                         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                         {
-                            if (reader.TokenType is not JsonTokenType.PropertyName) continue;
+                            if (reader.TokenType is not JsonTokenType.PropertyName)
+                                continue;
 
-                            if (valueType is null && reader.ValueTextEquals("type"u8) && reader.Read())
+                            if (
+                                valueType is null
+                                && reader.ValueTextEquals("type"u8)
+                                && reader.Read()
+                            )
                                 valueType = reader.GetString();
                             else if (reader.ValueTextEquals("base64"u8) && reader.Read())
-                                writer.WriteBase64String(cols[colIndex], reader.GetBytesFromBase64());
+                                writer.WriteBase64String(
+                                    cols[colIndex],
+                                    reader.GetBytesFromBase64()
+                                );
                             else if (reader.ValueTextEquals("value"u8) && reader.Read())
                                 switch (valueType)
                                 {
@@ -404,7 +439,9 @@ internal class ResultReader(
                 rowsWritten,
                 queryDurationInMilliseconds,
                 lastInsertedRowId,
-                replicationIndex));
+                replicationIndex
+            )
+        );
 
         marks.Add(rows);
     }

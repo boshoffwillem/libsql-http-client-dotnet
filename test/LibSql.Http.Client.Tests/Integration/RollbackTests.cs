@@ -23,20 +23,31 @@ public class RollbackTests() : TestWithContainersBase("products_rollback_scenari
             new Statement(
                 TestData.InsertSqlWithPositionalArgs,
                 [
-                    expectedItemSuccess.Id, expectedItemSuccess.Name, expectedItemSuccess.Description,
-                    expectedItemSuccess.Price, expectedItemSuccess.Stock, expectedItemSuccess.Image
-                ]),
+                    expectedItemSuccess.Id,
+                    expectedItemSuccess.Name,
+                    expectedItemSuccess.Description,
+                    expectedItemSuccess.Price,
+                    expectedItemSuccess.Stock,
+                    expectedItemSuccess.Image,
+                ]
+            ),
             new Statement(
                 TestData.InsertSqlWithPositionalArgs,
                 [
-                    expectedItemFail.Id, expectedItemFail.Name, null, expectedItemFail.Price, expectedItemFail.Stock,
-                    expectedItemFail.Image
-                ])
+                    expectedItemFail.Id,
+                    expectedItemFail.Name,
+                    null,
+                    expectedItemFail.Price,
+                    expectedItemFail.Stock,
+                    expectedItemFail.Image,
+                ]
+            ),
         ];
 
         var beforeCount = await LibSqlClient.ExecuteScalarAsync(TestData.CountSql);
 
-        var failingAction = () => LibSqlClient.ExecuteMultipleAsync(statements, TransactionMode.WriteImmediate);
+        var failingAction = () =>
+            LibSqlClient.ExecuteMultipleAsync(statements, TransactionMode.WriteImmediate);
 
         await failingAction.Should().ThrowExactlyAsync<LibSqlClientExecutionException>();
 

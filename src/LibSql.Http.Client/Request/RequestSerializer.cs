@@ -12,14 +12,15 @@ internal static class RequestSerializer
 
     private static readonly JsonWriterOptions WriterOptions = new()
     {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
 
     internal static async Task<HttpContent> Serialize(
         Statement[] statements,
         TransactionMode transactionMode,
         string? baton = null,
-        bool isInteractive = false)
+        bool isInteractive = false
+    )
     {
         var stream = new MemoryStream(256);
 
@@ -27,13 +28,21 @@ internal static class RequestSerializer
 
         writer.WriteStartObject();
 
-        if (baton is not null) writer.WriteString("baton"u8, baton);
+        if (baton is not null)
+            writer.WriteString("baton"u8, baton);
 
         writer.WriteStartArray("requests"u8);
 
         if (statements.Length == 1 && transactionMode is TransactionMode.None)
-            WriteStatementObject(writer, statements[0].Sql, statements[0].Args, statements[0].NamedArgs, "execute"u8);
-        else WriteBatchRequest(writer, statements, transactionMode, isInteractive);
+            WriteStatementObject(
+                writer,
+                statements[0].Sql,
+                statements[0].Args,
+                statements[0].NamedArgs,
+                "execute"u8
+            );
+        else
+            WriteBatchRequest(writer, statements, transactionMode, isInteractive);
 
         if (!isInteractive)
             writer.WriteRawValue("""{"type":"close"}"""u8, true);
@@ -46,17 +55,15 @@ internal static class RequestSerializer
 
         stream.Seek(0, SeekOrigin.Begin);
 
-        return new StreamContent(stream)
-        {
-            Headers = { ContentType = ContentTypeHeaderValue }
-        };
+        return new StreamContent(stream) { Headers = { ContentType = ContentTypeHeaderValue } };
     }
 
     private static void WriteBatchRequest(
         Utf8JsonWriter writer,
         Statement[] statements,
         TransactionMode transactionMode,
-        bool isInteractive)
+        bool isInteractive
+    )
     {
         writer.WriteStartObject();
 
@@ -94,12 +101,13 @@ internal static class RequestSerializer
         {
             writer.WriteRawValue(
                 $"{{\"stmt\":{{\"sql\":\"COMMIT\"}},\"condition\":{{\"type\":\"ok\",\"step\":{lastStep}}}}}",
-                true);
+                true
+            );
             writer.WriteRawValue(
                 $"{{\"stmt\":{{\"sql\":\"ROLLBACK\"}},\"condition\":{{\"type\":\"not\",\"cond\":{{\"type\":\"ok\",\"step\":{lastStep + 1}}}}}}}",
-                true);
+                true
+            );
         }
-
 
         writer.WriteEndArray();
 
@@ -108,18 +116,19 @@ internal static class RequestSerializer
         writer.WriteEndObject();
     }
 
-
     private static void WriteStatementObject(
         Utf8JsonWriter writer,
         ReadOnlySpan<char> sql,
         object?[]? args,
         Dictionary<string, object?>? namedArgs,
         ReadOnlySpan<byte> type = default,
-        int lastStep = -1)
+        int lastStep = -1
+    )
     {
         writer.WriteStartObject();
 
-        if (!type.IsEmpty) writer.WriteString("type"u8, type);
+        if (!type.IsEmpty)
+            writer.WriteString("type"u8, type);
 
         writer.WriteStartObject("stmt"u8);
         writer.WriteString("sql"u8, sql);
@@ -127,7 +136,8 @@ internal static class RequestSerializer
         if (args is not null && args.Length > 0)
         {
             writer.WriteStartArray("args"u8);
-            foreach (var arg in args) WriteArgObject(writer, arg);
+            foreach (var arg in args)
+                WriteArgObject(writer, arg);
 
             writer.WriteEndArray();
         }
@@ -234,7 +244,8 @@ internal static class RequestSerializer
         Utf8JsonWriter writer,
         ReadOnlySpan<byte> propName,
         ulong value,
-        int byteSize)
+        int byteSize
+    )
     {
         Span<byte> destination = stackalloc byte[byteSize];
         Utf8Formatter.TryFormat(value, destination, out var bytesWritten);
@@ -245,7 +256,8 @@ internal static class RequestSerializer
         Utf8JsonWriter writer,
         ReadOnlySpan<byte> propName,
         long value,
-        int byteSize)
+        int byteSize
+    )
     {
         Span<byte> destination = stackalloc byte[byteSize];
         Utf8Formatter.TryFormat(value, destination, out var bytesWritten);

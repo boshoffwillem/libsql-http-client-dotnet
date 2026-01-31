@@ -15,4 +15,5 @@ public record ExecutionStats(
     int RowsWritten = 0,
     double QueryDurationInMilliseconds = 0,
     string? LastInsertedRowId = null,
-    string? ReplicationIndex = null);
+    string? ReplicationIndex = null
+);

@@ -10,11 +10,12 @@ namespace LibSql.Http.Client.Tests.Request;
 
 public class RequestSerializerTests
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions =
-        new(TestDataJsonSerializerContext.Default.HranaPipelineRequestBody.Options)
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new(
+        TestDataJsonSerializerContext.Default.HranaPipelineRequestBody.Options
+    )
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
 
     [Theory]
     [JsonFileData("Data/execute.json")]
@@ -26,7 +27,8 @@ public class RequestSerializerTests
             [statement],
             scenario.Transaction,
             scenario.Baton,
-            scenario.IsInteractive);
+            scenario.IsInteractive
+        );
 
         var strOutput = await output.ReadAsStringAsync();
 
@@ -43,7 +45,8 @@ public class RequestSerializerTests
             scenario.Statements.Select(s => s.ToStatement()).ToArray(),
             scenario.Transaction,
             scenario.Baton,
-            scenario.IsInteractive);
+            scenario.IsInteractive
+        );
 
         var strOutput = await output.ReadAsStringAsync();
 

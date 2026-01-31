@@ -9,5 +9,6 @@ namespace LibSql.Http.Client.Tests.Shared.Models;
 [JsonSerializable(typeof(ResultSetTestModel))]
 [JsonSourceGenerationOptions(
     NumberHandling = JsonNumberHandling.AllowReadingFromString,
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+)]
 public partial class TestDataJsonSerializerContext : JsonSerializerContext;

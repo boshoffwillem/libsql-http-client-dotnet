@@ -11,8 +11,8 @@ public class LibSqlClientExecutionException : LibSqlClientException
     ///     Create exception using errors from pipeline request
     /// </summary>
     /// <param name="executionErrors">Errors from pipeline response</param>
-    public LibSqlClientExecutionException(IReadOnlyCollection<ExecutionError> executionErrors) : base(
-        FormatErrorMessage(executionErrors))
+    public LibSqlClientExecutionException(IReadOnlyCollection<ExecutionError> executionErrors)
+        : base(FormatErrorMessage(executionErrors))
     {
         ExecutionErrors = executionErrors;
     }
@@ -37,7 +37,9 @@ public class LibSqlClientExecutionException : LibSqlClientException
                     var codePart = error.Code is null ? string.Empty : $"({error.Code}) ";
 
                     return $"{TabConstant}[{index}]: {codePart}{error.Message}";
-                }));
+                }
+            )
+        );
 
         return $"[LibSqlPipelineError] The request failed.{Environment.NewLine}{joinedMessages}";
     }

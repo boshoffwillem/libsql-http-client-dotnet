@@ -9,7 +9,9 @@ namespace LibSql.Http.Client.Tests.Integration;
 public abstract class TestWithContainersBase : IAsyncDisposable
 {
     private readonly HttpMessageHandler _handler = new SocketsHttpHandler
-        { AutomaticDecompression = DecompressionMethods.All };
+    {
+        AutomaticDecompression = DecompressionMethods.All,
+    };
 
     private readonly IContainer _libSqlContainer;
     protected readonly ProductTestData TestData;
@@ -21,11 +23,14 @@ public abstract class TestWithContainersBase : IAsyncDisposable
         TestData = new ProductTestData(tableName);
         ConsoleLogger.Instance.DebugLogLevelEnabled = true;
         LibSqlClient = new LibSqlHttpClient(_httpClient, new Uri("https://fake.test"));
-        _libSqlContainer =
-            new ContainerBuilder().WithImage("ghcr.io/tursodatabase/libsql-server:latest").WithPortBinding(8080, true)
-                .WithWaitStrategy(
-                    Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPath("/health").ForPort(8080)))
-                .Build();
+        _libSqlContainer = new ContainerBuilder()
+            .WithImage("ghcr.io/tursodatabase/libsql-server:latest")
+            .WithPortBinding(8080, true)
+            .WithWaitStrategy(
+                Wait.ForUnixContainer()
+                    .UntilHttpRequestIsSucceeded(r => r.ForPath("/health").ForPort(8080))
+            )
+            .Build();
     }
 
     public async ValueTask DisposeAsync()
@@ -36,7 +41,8 @@ public abstract class TestWithContainersBase : IAsyncDisposable
 
     protected virtual async Task InitializeContainer()
     {
-        if (_libSqlContainer.State is TestcontainersStates.Running) return;
+        if (_libSqlContainer.State is TestcontainersStates.Running)
+            return;
 
         await _libSqlContainer.StartAsync();
 
@@ -45,7 +51,8 @@ public abstract class TestWithContainersBase : IAsyncDisposable
             BaseAddress = new UriBuilder(
                 Uri.UriSchemeHttp,
                 _libSqlContainer.Hostname,
-                _libSqlContainer.GetMappedPublicPort(8080)).Uri
+                _libSqlContainer.GetMappedPublicPort(8080)
+            ).Uri,
         };
 
         LibSqlClient = new LibSqlHttpClient(_httpClient);

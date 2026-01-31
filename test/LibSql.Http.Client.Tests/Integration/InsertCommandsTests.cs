@@ -14,18 +14,24 @@ public class InsertCommandsTests() : TestWithContainersBase("products_insert_com
 
         var items = ProductTestData.Items.Where(i => i.Image is null).ToArray();
 
-        var statements = items.Select(
-            i => new Statement(
+        var statements = items
+            .Select(i => new Statement(
                 TestData.InsertSqlWithPositionalArgs,
-                [i.Id, i.Name, i.Description, i.Price, i.Stock, i.Image])).ToArray();
+                [i.Id, i.Name, i.Description, i.Price, i.Stock, i.Image]
+            ))
+            .ToArray();
 
-        var results = await LibSqlClient.ExecuteMultipleAsync(statements, TransactionMode.WriteImmediate);
+        var results = await LibSqlClient.ExecuteMultipleAsync(
+            statements,
+            TransactionMode.WriteImmediate
+        );
 
         results.Should().Be(statements.Length);
 
         var insertedItems = await LibSqlClient.QueryAsync<ProductTestModel>(
             TestData.SelectProductsWithoutImageSql,
-            IntegrationTestsSerializerContext.Default.ProductTestModel);
+            IntegrationTestsSerializerContext.Default.ProductTestModel
+        );
 
         insertedItems.Should().BeEquivalentTo(items);
     }
@@ -37,8 +43,8 @@ public class InsertCommandsTests() : TestWithContainersBase("products_insert_com
 
         var items = ProductTestData.Items.Where(i => i.Image is not null).ToArray();
 
-        var statements = items.Select(
-            i => new Statement(
+        var statements = items
+            .Select(i => new Statement(
                 TestData.InsertSqlWithNamedArgs,
                 new Dictionary<string, object?>
                 {
@@ -47,16 +53,22 @@ public class InsertCommandsTests() : TestWithContainersBase("products_insert_com
                     { "description", i.Description },
                     { "price", i.Price },
                     { "stock", i.Stock },
-                    { "image", i.Image }
-                })).ToArray();
+                    { "image", i.Image },
+                }
+            ))
+            .ToArray();
 
-        var results = await LibSqlClient.ExecuteMultipleAsync(statements, TransactionMode.WriteImmediate);
+        var results = await LibSqlClient.ExecuteMultipleAsync(
+            statements,
+            TransactionMode.WriteImmediate
+        );
 
         results.Should().Be(statements.Length);
 
         var insertedItems = await LibSqlClient.QueryAsync<ProductTestModel>(
             TestData.SelectProductsWithImageSql,
-            IntegrationTestsSerializerContext.Default.ProductTestModel);
+            IntegrationTestsSerializerContext.Default.ProductTestModel
+        );
 
         insertedItems.Should().BeEquivalentTo(items);
     }

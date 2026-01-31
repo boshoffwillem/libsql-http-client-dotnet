@@ -6,11 +6,12 @@ internal sealed class PooledByteBufferWriter(int initialCapacity) : IBufferWrite
 {
     private const int MinimumBufferSize = 256;
 
-    private byte[] _buffer = ArrayPool<byte>.Shared.Rent(Math.Max(initialCapacity, MinimumBufferSize));
+    private byte[] _buffer = ArrayPool<byte>.Shared.Rent(
+        Math.Max(initialCapacity, MinimumBufferSize)
+    );
 
-    public PooledByteBufferWriter() : this(MinimumBufferSize)
-    {
-    }
+    public PooledByteBufferWriter()
+        : this(MinimumBufferSize) { }
 
     public ReadOnlyMemory<byte> WrittenMemory => _buffer.AsMemory(0, WrittenCount);
 
@@ -55,7 +56,8 @@ internal sealed class PooledByteBufferWriter(int initialCapacity) : IBufferWrite
 
     private void CheckAndResizeBuffer(int sizeHint)
     {
-        if (sizeHint < 0) throw new ArgumentException(nameof(sizeHint));
+        if (sizeHint < 0)
+            throw new ArgumentException(nameof(sizeHint));
 
         sizeHint = Math.Max(sizeHint, 1);
 

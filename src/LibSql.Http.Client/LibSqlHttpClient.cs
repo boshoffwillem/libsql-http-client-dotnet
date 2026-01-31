@@ -69,7 +69,8 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         if (url is null)
             throw new ArgumentNullException(
                 nameof(url),
-                "URL not set. Please provide a URL either in the constructor or as a parameter or via HttpClient.BaseAddress.");
+                "URL not set. Please provide a URL either in the constructor or as a parameter or via HttpClient.BaseAddress."
+            );
 
         _pipelineUri = new Uri(url, PipelineV3Path);
         _healthUri = new Uri(url, HealthPath).ToString();
@@ -77,7 +78,10 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         _httpClient = httpClient;
 
         if (authToken is not null)
-            _authHeaderValue = new AuthenticationHeaderValue("Bearer", authToken.Replace("Bearer ", ""));
+            _authHeaderValue = new AuthenticationHeaderValue(
+                "Bearer",
+                authToken.Replace("Bearer ", "")
+            );
     }
 
     /// <inheritdoc />
@@ -88,112 +92,134 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
     public Task<int> ExecuteAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
-        ExecuteMultipleAsync(
-            [statement],
-            transactionMode,
-            cancellationToken);
+        CancellationToken cancellationToken = default
+    ) => ExecuteMultipleAsync([statement], transactionMode, cancellationToken);
 
     /// <inheritdoc />
     public Task<int> ExecuteMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalSendPipelineRequestAsync(
             statements,
             transactionMode,
             reader => reader.AffectedRows,
             true,
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<object?> ExecuteScalarAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalSendPipelineRequestAsync(
             [statement],
             transactionMode,
             reader => reader.GetScalarValue(),
             true,
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<T> QueryFirstAsync<T>(
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.First(),
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<T?> QueryFirstOrDefaultAsync<T>(
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.FirstOrDefault(),
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<T> QuerySingleAsync<T>(
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.Single(),
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<T?> QuerySingleOrDefaultAsync<T>(
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.SingleOrDefault(),
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<IEnumerable<T>> QueryAsync<T>(
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result,
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public Task<IResultReader> QueryMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode,
-        CancellationToken cancellationToken = default) =>
-        InternalSendPipelineRequestAsync(statements, transactionMode, reader => reader, false, cancellationToken);
+        CancellationToken cancellationToken = default
+    ) =>
+        InternalSendPipelineRequestAsync(
+            statements,
+            transactionMode,
+            reader => reader,
+            false,
+            cancellationToken
+        );
 
     /// <inheritdoc />
     public async Task<bool> HealthCheckAsync(CancellationToken cancellationToken = default)
     {
-        using var res = await _httpClient.GetAsync(_healthUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var res = await _httpClient.GetAsync(
+            _healthUri,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken
+        );
 
         return res.IsSuccessStatusCode;
     }
@@ -203,28 +229,33 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode,
         Func<IEnumerable<T>, TResult> processorFn,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken
+    ) =>
         InternalSendPipelineRequestAsync(
             [statement],
             transactionMode,
-            reader => processorFn(reader.Count > 0 ? reader.ReadAt(0, jsonTypeInfo) : Array.Empty<T>()),
+            reader =>
+                processorFn(reader.Count > 0 ? reader.ReadAt(0, jsonTypeInfo) : Array.Empty<T>()),
             true,
-            cancellationToken);
+            cancellationToken
+        );
 
     private async Task<TResult> InternalSendPipelineRequestAsync<TResult>(
         Statement[] statements,
         TransactionMode transactionMode,
         Func<IResultReader, TResult> processorFn,
         bool disposeReader,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         using var content = await RequestSerializer.Serialize(statements, transactionMode);
 
         using var res = await SendRequestAsync(content, cancellationToken);
 
-        var resultsToIgnore = transactionMode is TransactionMode.None
-            ? new HashSet<int>()
-            : new HashSet<int> { 0, statements.Length + 1, statements.Length + 2 };
+        var resultsToIgnore =
+            transactionMode is TransactionMode.None
+                ? new HashSet<int>()
+                : new HashSet<int> { 0, statements.Length + 1, statements.Length + 2 };
 
         var reader = await ResultReader.ParseAsync(res.Content, resultsToIgnore, cancellationToken);
 
@@ -238,11 +269,15 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         }
         finally
         {
-            if (disposeReader) reader.Dispose();
+            if (disposeReader)
+                reader.Dispose();
         }
     }
 
-    private async Task<HttpResponseMessage> SendRequestAsync(HttpContent content, CancellationToken cancellationToken)
+    private async Task<HttpResponseMessage> SendRequestAsync(
+        HttpContent content,
+        CancellationToken cancellationToken
+    )
     {
         HttpResponseMessage? res = null;
 
@@ -251,7 +286,7 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
             var request = new HttpRequestMessage(HttpMethod.Post, _pipelineUri)
             {
                 Content = content,
-                Version = new Version(2, 0)
+                Version = new Version(2, 0),
             };
 
             if (_authHeaderValue is not null)
@@ -260,18 +295,21 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
             res = await _httpClient.SendAsync(
                 request,
                 HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken);
+                cancellationToken
+            );
         }
         catch (Exception e)
         {
             throw new LibSqlClientException("[LibSqlHttpClient] Error sending pipeline request", e);
         }
 
-        if (res.IsSuccessStatusCode) return res;
+        if (res.IsSuccessStatusCode)
+            return res;
 
         var bodyContent = await res.Content.ReadAsStringAsync(cancellationToken);
 
         throw new LibSqlClientException(
-            $"[LibSqlHttpClient] Error sending pipeline request. Status Code: {res.StatusCode}, body: {bodyContent}");
+            $"[LibSqlHttpClient] Error sending pipeline request. Status Code: {res.StatusCode}, body: {bodyContent}"
+        );
     }
 }

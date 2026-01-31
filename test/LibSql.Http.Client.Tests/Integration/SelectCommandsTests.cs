@@ -16,7 +16,7 @@ public class SelectCommandsTests() : TestWithContainersBase("products_select_com
 
         isHealth.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task CheckSelectAll()
     {
@@ -24,7 +24,8 @@ public class SelectCommandsTests() : TestWithContainersBase("products_select_com
 
         var allItems = await LibSqlClient.QueryAsync(
             TestData.SelectAllSql,
-            IntegrationTestsSerializerContext.Default.ProductTestModel);
+            IntegrationTestsSerializerContext.Default.ProductTestModel
+        );
 
         allItems.Should().BeEquivalentTo(ProductTestData.Items);
     }
@@ -40,7 +41,8 @@ public class SelectCommandsTests() : TestWithContainersBase("products_select_com
 
         var item = await LibSqlClient.QuerySingleAsync(
             new Statement(TestData.SelectByIdSql, [expectedItem.Id]),
-            IntegrationTestsSerializerContext.Default.ProductTestModel);
+            IntegrationTestsSerializerContext.Default.ProductTestModel
+        );
 
         item.Should().BeEquivalentTo(expectedItem);
     }
@@ -54,7 +56,8 @@ public class SelectCommandsTests() : TestWithContainersBase("products_select_com
 
         var item = await LibSqlClient.QueryFirstAsync(
             new Statement(TestData.SelectLikeNameSql, [$"%{expectedItem.Name}%"]),
-            IntegrationTestsSerializerContext.Default.ProductTestModel);
+            IntegrationTestsSerializerContext.Default.ProductTestModel
+        );
 
         item.Should().BeEquivalentTo(expectedItem);
     }
@@ -63,10 +66,12 @@ public class SelectCommandsTests() : TestWithContainersBase("products_select_com
     {
         await base.InitializeContainer();
 
-        var statements = ProductTestData.Items.Select(
-            i => new Statement(
+        var statements = ProductTestData
+            .Items.Select(i => new Statement(
                 TestData.InsertSqlWithPositionalArgs,
-                [i.Id, i.Name, i.Description, i.Price, i.Stock, i.Image])).ToArray();
+                [i.Id, i.Name, i.Description, i.Price, i.Stock, i.Image]
+            ))
+            .ToArray();
 
         await LibSqlClient.ExecuteMultipleAsync(statements, TransactionMode.WriteImmediate);
     }

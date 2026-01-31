@@ -28,7 +28,8 @@ public interface ILibSqlHttpClient
     Task<int> ExecuteAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Executes multiple SQL statements asynchronously in a single network call and returns the total number of rows
@@ -41,7 +42,8 @@ public interface ILibSqlHttpClient
     Task<int> ExecuteMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Executes a SQL command asynchronously and retrieves the first column of the first row in the result set returned by
@@ -54,7 +56,8 @@ public interface ILibSqlHttpClient
     Task<object?> ExecuteScalarAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Queries the database asynchronously for the first record and maps it to an object of <typeparamref name="T" />.
@@ -69,7 +72,8 @@ public interface ILibSqlHttpClient
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Queries the database asynchronously for the first record or a default value if no records are found, and maps the
@@ -85,7 +89,8 @@ public interface ILibSqlHttpClient
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Queries the database asynchronously for a single record and maps the
@@ -101,7 +106,8 @@ public interface ILibSqlHttpClient
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Queries the database asynchronously for a single record or a default value if no records are found and maps the
@@ -117,7 +123,8 @@ public interface ILibSqlHttpClient
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Queries the database asynchronously maps the result to a sequence of data of <typeparamref name="T" />.
@@ -132,7 +139,8 @@ public interface ILibSqlHttpClient
         Statement statement,
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Execute multiple queries on the database asynchronously and return a forward-only result reader.
@@ -144,10 +152,11 @@ public interface ILibSqlHttpClient
     Task<IResultReader> QueryMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode = TransactionMode.None,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
-    /// Check if the connection to libSQL server is healthy 
+    /// Check if the connection to libSQL server is healthy
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
