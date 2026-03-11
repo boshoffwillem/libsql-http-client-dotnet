@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization.Metadata;
 using LibSql.Http.Client.Exceptions;
-using LibSql.Http.Client.Response;
 
 namespace LibSql.Http.Client.Interfaces;
 
@@ -13,7 +11,7 @@ namespace LibSql.Http.Client.Interfaces;
 public interface IResultReader : IDisposable
 {
     /// <summary>
-    /// Number of Result sets
+    ///     Number of Result sets
     /// </summary>
     int Count { get; }
 
@@ -35,7 +33,7 @@ public interface IResultReader : IDisposable
     void ThrowIfError();
 
     /// <summary>
-    /// Check if there are more results to process
+    ///     Check if there are more results to process
     /// </summary>
     /// <returns></returns>
     bool HasMoreResults();

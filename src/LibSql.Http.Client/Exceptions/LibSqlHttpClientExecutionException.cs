@@ -29,12 +29,12 @@ public class LibSqlClientExecutionException : LibSqlClientException
 
     private static string FormatErrorMessage(IReadOnlyCollection<ExecutionError> executionErrors)
     {
-        var joinedMessages = string.Join(
+        string joinedMessages = string.Join(
             Environment.NewLine,
             executionErrors.Select(
                 (error, index) =>
                 {
-                    var codePart = error.Code is null ? string.Empty : $"({error.Code}) ";
+                    string codePart = error.Code is null ? string.Empty : $"({error.Code}) ";
 
                     return $"{TabConstant}[{index}]: {codePart}{error.Message}";
                 }

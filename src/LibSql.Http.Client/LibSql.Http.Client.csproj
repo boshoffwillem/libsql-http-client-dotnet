@@ -42,7 +42,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\libsql-pkg-icon.png" Visible="false" Pack="true">
+    <None Include="..\..\libsql-pkg-icon.png" Pack="true" Visible="false">
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>

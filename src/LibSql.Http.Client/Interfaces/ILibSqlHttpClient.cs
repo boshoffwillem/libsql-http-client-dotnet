@@ -156,7 +156,7 @@ public interface ILibSqlHttpClient
     );
 
     /// <summary>
-    /// Check if the connection to libSQL server is healthy
+    ///     Check if the connection to libSQL server is healthy
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>

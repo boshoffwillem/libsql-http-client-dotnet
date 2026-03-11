@@ -13,10 +13,10 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
     private const string PipelineV3Path = "/v3/pipeline";
     private const string HealthPath = "/health";
     private readonly AuthenticationHeaderValue? _authHeaderValue;
+    private readonly string _healthUri;
 
     private readonly HttpClient _httpClient;
     private readonly Uri _pipelineUri;
-    private readonly string _healthUri;
 
     /// <summary>
     ///     Creates a new instance of <see cref="LibSqlHttpClient" />.
@@ -67,10 +67,12 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         url ??= httpClient.BaseAddress;
 
         if (url is null)
+        {
             throw new ArgumentNullException(
                 nameof(url),
                 "URL not set. Please provide a URL either in the constructor or as a parameter or via HttpClient.BaseAddress."
             );
+        }
 
         _pipelineUri = new Uri(url, PipelineV3Path);
         _healthUri = new Uri(url, HealthPath).ToString();
@@ -78,50 +80,61 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         _httpClient = httpClient;
 
         if (authToken is not null)
+        {
             _authHeaderValue = new AuthenticationHeaderValue(
                 "Bearer",
                 authToken.Replace("Bearer ", "")
             );
+        }
     }
 
     /// <inheritdoc />
-    public ILibSqlHttpClient WithCredentials(Uri url, string? authToken = null) =>
-        new LibSqlHttpClient(_httpClient, url, authToken);
+    public ILibSqlHttpClient WithCredentials(Uri url, string? authToken = null)
+    {
+        return new LibSqlHttpClient(_httpClient, url, authToken);
+    }
 
     /// <inheritdoc />
     public Task<int> ExecuteAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) => ExecuteMultipleAsync([statement], transactionMode, cancellationToken);
+    )
+    {
+        return ExecuteMultipleAsync([statement], transactionMode, cancellationToken);
+    }
 
     /// <inheritdoc />
     public Task<int> ExecuteMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalSendPipelineRequestAsync(
+    )
+    {
+        return InternalSendPipelineRequestAsync(
             statements,
             transactionMode,
             reader => reader.AffectedRows,
             true,
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<object?> ExecuteScalarAsync(
         Statement statement,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalSendPipelineRequestAsync(
+    )
+    {
+        return InternalSendPipelineRequestAsync(
             [statement],
             transactionMode,
             reader => reader.GetScalarValue(),
             true,
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<T> QueryFirstAsync<T>(
@@ -129,14 +142,16 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalQueryAsync(
+    )
+    {
+        return InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.First(),
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<T?> QueryFirstOrDefaultAsync<T>(
@@ -144,14 +159,16 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalQueryAsync(
+    )
+    {
+        return InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.FirstOrDefault(),
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<T> QuerySingleAsync<T>(
@@ -159,14 +176,16 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalQueryAsync(
+    )
+    {
+        return InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.Single(),
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<T?> QuerySingleOrDefaultAsync<T>(
@@ -174,14 +193,16 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalQueryAsync(
+    )
+    {
+        return InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result.SingleOrDefault(),
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<IEnumerable<T>> QueryAsync<T>(
@@ -189,33 +210,37 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         JsonTypeInfo<T> jsonTypeInfo,
         TransactionMode transactionMode = TransactionMode.None,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalQueryAsync(
+    )
+    {
+        return InternalQueryAsync(
             statement,
             jsonTypeInfo,
             transactionMode,
             result => result,
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public Task<IResultReader> QueryMultipleAsync(
         Statement[] statements,
         TransactionMode transactionMode,
         CancellationToken cancellationToken = default
-    ) =>
-        InternalSendPipelineRequestAsync(
+    )
+    {
+        return InternalSendPipelineRequestAsync(
             statements,
             transactionMode,
             reader => reader,
             false,
             cancellationToken
         );
+    }
 
     /// <inheritdoc />
     public async Task<bool> HealthCheckAsync(CancellationToken cancellationToken = default)
     {
-        using var res = await _httpClient.GetAsync(
+        using HttpResponseMessage res = await _httpClient.GetAsync(
             _healthUri,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken
@@ -230,8 +255,9 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         TransactionMode transactionMode,
         Func<IEnumerable<T>, TResult> processorFn,
         CancellationToken cancellationToken
-    ) =>
-        InternalSendPipelineRequestAsync(
+    )
+    {
+        return InternalSendPipelineRequestAsync(
             [statement],
             transactionMode,
             reader =>
@@ -239,6 +265,7 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
             true,
             cancellationToken
         );
+    }
 
     private async Task<TResult> InternalSendPipelineRequestAsync<TResult>(
         Statement[] statements,
@@ -248,29 +275,35 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         CancellationToken cancellationToken
     )
     {
-        using var content = await RequestSerializer.Serialize(statements, transactionMode);
+        using HttpContent content = await RequestSerializer.Serialize(statements, transactionMode);
 
-        using var res = await SendRequestAsync(content, cancellationToken);
+        using HttpResponseMessage res = await SendRequestAsync(content, cancellationToken);
 
-        var resultsToIgnore =
+        HashSet<int> resultsToIgnore =
             transactionMode is TransactionMode.None
                 ? new HashSet<int>()
                 : new HashSet<int> { 0, statements.Length + 1, statements.Length + 2 };
 
-        var reader = await ResultReader.ParseAsync(res.Content, resultsToIgnore, cancellationToken);
+        ResultReader reader = await ResultReader.ParseAsync(
+            res.Content,
+            resultsToIgnore,
+            cancellationToken
+        );
 
         try
         {
             reader.ThrowIfError();
 
-            var result = processorFn(reader);
+            TResult result = processorFn(reader);
 
             return result;
         }
         finally
         {
             if (disposeReader)
+            {
                 reader.Dispose();
+            }
         }
     }
 
@@ -283,14 +316,16 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
 
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, _pipelineUri)
+            HttpRequestMessage request = new(HttpMethod.Post, _pipelineUri)
             {
                 Content = content,
                 Version = new Version(2, 0),
             };
 
             if (_authHeaderValue is not null)
+            {
                 request.Headers.Authorization = _authHeaderValue;
+            }
 
             res = await _httpClient.SendAsync(
                 request,
@@ -304,9 +339,11 @@ public sealed class LibSqlHttpClient : ILibSqlHttpClient
         }
 
         if (res.IsSuccessStatusCode)
+        {
             return res;
+        }
 
-        var bodyContent = await res.Content.ReadAsStringAsync(cancellationToken);
+        string bodyContent = await res.Content.ReadAsStringAsync(cancellationToken);
 
         throw new LibSqlClientException(
             $"[LibSqlHttpClient] Error sending pipeline request. Status Code: {res.StatusCode}, body: {bodyContent}"

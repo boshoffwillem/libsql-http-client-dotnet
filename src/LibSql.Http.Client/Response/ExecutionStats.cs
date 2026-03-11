@@ -1,7 +1,7 @@
 namespace LibSql.Http.Client.Response;
 
 /// <summary>
-/// Record to hold the stats of pipeline executions
+///     Record to hold the stats of pipeline executions
 /// </summary>
 /// <param name="RowsRead">Number of rows read</param>
 /// <param name="AffectedRows">Number of affected rows</param>

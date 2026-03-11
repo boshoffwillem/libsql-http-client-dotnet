@@ -22,9 +22,15 @@ internal sealed class PooledByteBufferWriter(int initialCapacity) : IBufferWrite
     public void Advance(int count)
     {
         if (count < 0)
+        {
             throw new ArgumentException(null, nameof(count));
+        }
+
         if (WrittenCount > _buffer.Length - count)
+        {
             ThrowInvalidOperationException_AdvancedTooFar(_buffer.Length);
+        }
+
         WrittenCount += count;
     }
 
@@ -46,7 +52,10 @@ internal sealed class PooledByteBufferWriter(int initialCapacity) : IBufferWrite
         ArrayPool<byte>.Shared.Return(_buffer);
     }
 
-    public ReadOnlySpan<byte> AsSpan(long[] marks) => _buffer.AsSpan((int)marks[0], (int)marks[1]);
+    public ReadOnlySpan<byte> AsSpan(long[] marks)
+    {
+        return _buffer.AsSpan((int)marks[0], (int)marks[1]);
+    }
 
     private void Clear()
     {
@@ -57,32 +66,39 @@ internal sealed class PooledByteBufferWriter(int initialCapacity) : IBufferWrite
     private void CheckAndResizeBuffer(int sizeHint)
     {
         if (sizeHint < 0)
+        {
             throw new ArgumentException(nameof(sizeHint));
+        }
 
         sizeHint = Math.Max(sizeHint, 1);
 
         if (sizeHint <= FreeCapacity)
+        {
             return;
+        }
 
-        var length = _buffer.Length;
+        int length = _buffer.Length;
 
-        var val1 = Math.Max(sizeHint, length == 0 ? MinimumBufferSize : length);
+        int val1 = Math.Max(sizeHint, length == 0 ? MinimumBufferSize : length);
 
-        var newSize = length + val1;
+        int newSize = length + val1;
 
         if ((uint)newSize > int.MaxValue)
         {
-            var capacity = (uint)(length - FreeCapacity + sizeHint);
+            uint capacity = (uint)(length - FreeCapacity + sizeHint);
             if (capacity > Array.MaxLength)
+            {
                 ThrowOutOfMemoryException(capacity);
+            }
+
             newSize = Array.MaxLength;
         }
 
-        var oldBuffer = _buffer;
+        byte[] oldBuffer = _buffer;
 
         _buffer = ArrayPool<byte>.Shared.Rent(newSize);
 
-        var oldBufferAsSpan = oldBuffer.AsSpan(0, WrittenCount);
+        Span<byte> oldBufferAsSpan = oldBuffer.AsSpan(0, WrittenCount);
 
         oldBufferAsSpan.CopyTo(_buffer);
         oldBufferAsSpan.Clear();

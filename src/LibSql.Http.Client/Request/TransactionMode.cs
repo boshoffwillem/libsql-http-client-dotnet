@@ -1,27 +1,27 @@
 namespace LibSql.Http.Client.Request;
 
 /// <summary>
-/// Transaction mode for the pipeline request
+///     Transaction mode for the pipeline request
 /// </summary>
 public enum TransactionMode
 {
     /// <summary>
-    /// No transaction required
+    ///     No transaction required
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// BEGIN IMMEDIATE
+    ///     BEGIN IMMEDIATE
     /// </summary>
     WriteImmediate = 1,
 
     /// <summary>
-    /// BEGIN DEFERRED
+    ///     BEGIN DEFERRED
     /// </summary>
     Deferred = 2,
 
     /// <summary>
-    /// BEGIN TRANSACtION READONLY
+    ///     BEGIN TRANSACtION READONLY
     /// </summary>
     ReadOnly = 3,
 }

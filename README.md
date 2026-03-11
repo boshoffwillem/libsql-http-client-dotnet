@@ -1,6 +1,7 @@
 # LibSql.Http.Client
 
-An alternative [libSQL](https://github.com/tursodatabase/libsql) .NET client, supporting HTTP protocol, fully trimmable and AOT compatible.
+An alternative [libSQL](https://github.com/tursodatabase/libsql) .NET client, supporting HTTP protocol, fully trimmable
+and AOT compatible.
 
 > [!WARNING]
 > This is not an official libSQL client
@@ -31,7 +32,9 @@ The instance of the client expect an instance of HttpClient.
 
 The most performant way is use a singleton instance of HttpClient.
 
-Check the offical .NET [HTTP client guidelines](https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient-guidelines) for more information.
+Check the offical
+.NET [HTTP client guidelines](https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient-guidelines)
+for more information.
 
 ```csharp
 var handler = new SocketsHttpHandler

@@ -22,18 +22,21 @@ internal static class RequestSerializer
         bool isInteractive = false
     )
     {
-        var stream = new MemoryStream(256);
+        MemoryStream stream = new(256);
 
-        await using var writer = new Utf8JsonWriter(stream, WriterOptions);
+        await using Utf8JsonWriter writer = new(stream, WriterOptions);
 
         writer.WriteStartObject();
 
         if (baton is not null)
+        {
             writer.WriteString("baton"u8, baton);
+        }
 
         writer.WriteStartArray("requests"u8);
 
         if (statements.Length == 1 && transactionMode is TransactionMode.None)
+        {
             WriteStatementObject(
                 writer,
                 statements[0].Sql,
@@ -41,11 +44,16 @@ internal static class RequestSerializer
                 statements[0].NamedArgs,
                 "execute"u8
             );
+        }
         else
+        {
             WriteBatchRequest(writer, statements, transactionMode, isInteractive);
+        }
 
         if (!isInteractive)
+        {
             writer.WriteRawValue("""{"type":"close"}"""u8, true);
+        }
 
         writer.WriteEndArray();
 
@@ -73,7 +81,7 @@ internal static class RequestSerializer
 
         writer.WriteStartArray("steps"u8);
 
-        var lastStep = transactionMode is TransactionMode.None ? -1 : 0;
+        int lastStep = transactionMode is TransactionMode.None ? -1 : 0;
 
         switch (transactionMode)
         {
@@ -91,7 +99,7 @@ internal static class RequestSerializer
                 break;
         }
 
-        foreach (var stmt in statements)
+        foreach (Statement stmt in statements)
         {
             WriteStatementObject(writer, stmt.Sql, stmt.Args, stmt.NamedArgs, default, lastStep);
             lastStep++;
@@ -128,7 +136,9 @@ internal static class RequestSerializer
         writer.WriteStartObject();
 
         if (!type.IsEmpty)
+        {
             writer.WriteString("type"u8, type);
+        }
 
         writer.WriteStartObject("stmt"u8);
         writer.WriteString("sql"u8, sql);
@@ -136,8 +146,10 @@ internal static class RequestSerializer
         if (args is not null && args.Length > 0)
         {
             writer.WriteStartArray("args"u8);
-            foreach (var arg in args)
+            foreach (object? arg in args)
+            {
                 WriteArgObject(writer, arg);
+            }
 
             writer.WriteEndArray();
         }
@@ -145,7 +157,7 @@ internal static class RequestSerializer
         if (namedArgs is not null && namedArgs.Count > 0)
         {
             writer.WriteStartArray("named_args"u8);
-            foreach (var namedArg in namedArgs)
+            foreach (KeyValuePair<string, object?> namedArg in namedArgs)
             {
                 writer.WriteStartObject();
 
@@ -248,7 +260,7 @@ internal static class RequestSerializer
     )
     {
         Span<byte> destination = stackalloc byte[byteSize];
-        Utf8Formatter.TryFormat(value, destination, out var bytesWritten);
+        Utf8Formatter.TryFormat(value, destination, out int bytesWritten);
         writer.WriteString(propName, destination[..bytesWritten]);
     }
 
@@ -260,7 +272,7 @@ internal static class RequestSerializer
     )
     {
         Span<byte> destination = stackalloc byte[byteSize];
-        Utf8Formatter.TryFormat(value, destination, out var bytesWritten);
+        Utf8Formatter.TryFormat(value, destination, out int bytesWritten);
         writer.WriteString(propName, destination[..bytesWritten]);
     }
 }

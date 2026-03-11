@@ -1,7 +1,7 @@
 namespace LibSql.Http.Client.Response;
 
 /// <summary>
-/// Execution error
+///     Execution error
 /// </summary>
 /// <param name="Message"></param>
 /// <param name="Code"></param>
